@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}KassenzettelGen Web - Kassenzettel Generator{% endblock %}
+
+{% block head %}
+<style>
+    .calendar-container {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+    }
+    
+    .calendar-header {
+        font-weight: bold;
+        text-align: center;
+        padding: 5px;
+    }
+    
+    /* Verbesserte Sichtbarkeit für Sonntage */
+    .calendar-header:last-child,
+    .calendar-day:nth-child(7n) .day-label {
+        color: #ff6b6b;
+        font-weight: bold;
+    }
+    
+    .calendar-day {
+        text-align: center;
+        padding: 8px 0;
+        border-radius: 4px;
+    }
+    
+    .calendar-day input[type="checkbox"] {
+        margin-right: 5px;
+    }
+    
+    .calendar-day.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    .day-label {
+        display: block;
+        padding: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        /* Größere Schrift und bessere Touch-Ziele für Mobilgeräte */
+        font-size: 1.1rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .day-label:hover {
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+    
+    input[type="checkbox"]:checked + .day-label {
+        background-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    /* Responsive Anpassungen für Mobilgeräte */
+    @media (max-width: 576px) {
+        .calendar-container {
+            gap: 2px;
+        }
+        
+        .calendar-header {
+            font-size: 0.9rem;
+            padding: 3px;
+        }
+        
+        .day-label {
+            padding: 8px 0;
+            min-height: 44px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">Kassenzettel Generator</h1>
+            <p class="lead">Generieren Sie einzelne oder mehrere Kassenzettel mit realistischen Daten.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Einzelnen Kassenzettel generieren</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('generate_single') }}" method="post">
+                            <div class="mb-3">
+                                <label for="dateSingle" class="form-label">Datum auswählen</label>
+                                <input type="date" class="form-control" id="dateSingle" name="date" required value="{{ now.strftime('%Y-%m-%d') }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Generieren</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Mehrere Kassenzettel generieren</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('generate_selected_days') }}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">{{ now.strftime('%B %Y') }} - Tage auswählen</label>
+                                <div class="calendar-container mb-3">
+                                    <div class="calendar-header">Mo</div>
+                                    <div class="calendar-header">Di</div>
+                                    <div class="calendar-header">Mi</div>
+                                    <div class="calendar-header">Do</div>
+                                    <div class="calendar-header">Fr</div>
+                                    <div class="calendar-header">Sa</div>
+                                    <div class="calendar-header">So</div>
+                                    
+                                    {% set first_day = now.replace(day=1) %}
+                                    {% set last_day = (now.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1) %}
+                                    {% set weekday_offset = first_day.weekday() %}
+                                    
+                                    {# Leere Zellen für Tage vor dem Monatsbeginn #}
+                                    {% for _ in range(weekday_offset) %}
+                                        <div class="calendar-day disabled"></div>
+                                    {% endfor %}
+                                    
+                                    {# Tage des Monats #}
+                                    {% for day in range(1, last_day.day + 1) %}
+                                        {% set current_date = now.replace(day=day) %}
+                                        {% set is_future = current_date > now %}
+                                        {% set is_today = current_date.day == now.day %}
+                                        
+                                        <div class="calendar-day {% if is_future %}disabled{% endif %}">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input visually-hidden" 
+                                                       id="day{{ day }}" name="selected_days" value="{{ day }}"
+                                                       {% if is_today %}checked{% endif %}
+                                                       {% if is_future %}disabled{% endif %}>
+                                                <label class="day-label w-100" for="day{{ day }}">
+                                                    {{ day }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Ausgewählte Tage generieren</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Hinweise</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Die Generierung eines Kassenzettels dauert etwa 5 Sekunden</li>
+                    <li>Der generierte Kassenzettel enthält zufällige Artikel aus einer vordefinierten Liste</li>
+                    <li>Alle Kassenzettel haben einen Gesamtbetrag zwischen 6,91 € und 23,00 €</li>
+                    <li>Bei der Generierung mehrerer Kassenzettel werden diese als ZIP-Archiv bereitgestellt</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Funktion zum Umschalten aller Checkboxen
+        document.querySelectorAll('.form-check-input:not([disabled])').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                // Hier könnten weitere Funktionen hinzugefügt werden
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{
+  "logo": "logo.png",
+  "stores": [
+      {
+          "name": "Lidl",
+          "address": "Kieler Straße 310\n22525 Hamburg-Stellingen",
+          "ust_id": "DE813810462"
+      },
+      {
+          "name": "Lidl",
+          "address": "Wandsbeker Marktstraße 81\n22041 Hamburg-Wandsbek",
+          "ust_id": "DE813810462"
+      },
+      {
+          "name": "Lidl",
+          "address": "Steindamm 96\n20099 Hamburg-St. Georg",
+          "ust_id": "DE813810462"
+      },
+      {
+          "name": "Lidl",
+          "address": "Große Bergstraße 154\n22767 Hamburg-Altona",
+          "ust_id": "DE813810462"
+      },
+      {
+          "name": "Lidl",
+          "address": "Friedrich-Ebert-Damm 111\n22047 Hamburg-Wandsbek",
+          "ust_id": "DE814100868"
+      }
+  ]
+}

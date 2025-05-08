@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}KassenzettelGen Web - Ergebnis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-md-12">
+        <div class="text-center mb-4">
+            <h1 class="display-4 mb-3">Generierte Kassenzettel</h1>
+            {% if receipts|length > 1 %}
+                <p class="lead">{{ receipts|length }} Kassenzettel wurden erfolgreich generiert.</p>
+                <div class="mb-4">
+                    <a href="{{ url_for('download_all') }}" class="btn btn-success"><i class="bi bi-file-earmark-zip"></i> Alle als ZIP herunterladen</a>
+                </div>
+            {% else %}
+                <p class="lead">Der Kassenzettel wurde erfolgreich generiert.</p>
+            {% endif %}
+        </div>
+
+        <div class="receipt-container">
+            {% for receipt in receipts %}
+                <div class="receipt-card mb-4">
+                    <div class="card">
+                        <div class="card-body p-2">
+                            <img src="{{ url_for('static', filename='generated/' + receipt) }}" alt="Kassenzettel {{ loop.index }}" class="receipt-img img-fluid mb-3" />
+                            <p class="mb-2">{{ receipt }}</p>
+                            <a href="{{ url_for('download_file', filename=receipt) }}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-download"></i> Herunterladen
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Zurück</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
