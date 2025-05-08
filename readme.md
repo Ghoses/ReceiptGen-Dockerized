@@ -38,7 +38,6 @@ A web application to generate receipts, packaged for Docker.
     docker run -d \
       --name receiptgen \
       -p 5000:5000 \
-      -v "$(pwd)":/app \
       --restart always \
       receiptgen-app
     ```
